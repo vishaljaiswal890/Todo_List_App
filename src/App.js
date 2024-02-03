@@ -1,34 +1,52 @@
-import React, { useState } from 'react';
-
-import CourseGoalList from './components/CourseGoals/CourseGoalList/CourseGoalList';
-import CourseInput from './components/CourseGoals/CourseInput/CourseInput';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import CourseGoalList from "./components/CourseGoals/CourseGoalList/CourseGoalList";
+import CourseInput from "./components/CourseGoals/CourseInput/CourseInput";
+import "./App.css";
 
 const App = () => {
   const [courseGoals, setCourseGoals] = useState([]);
+  const [cookies, setCookie, removeCookie] = useCookies(["courseGoals"]);
 
-  const addGoalHandler = enteredText => {
-    setCourseGoals(prevGoals => {
-      const updatedGoals = [...prevGoals];
-      updatedGoals.unshift({ text: enteredText, id: Math.random().toString() });
-      return updatedGoals;
-    });
+  useEffect(() => {
+    if (cookies.courseGoals) {
+      setCourseGoals(cookies.courseGoals);
+    }
+  }, [cookies.courseGoals]);
+
+  const addGoalHandler = (enteredText) => {
+    const newGoal = {
+      text: enteredText,
+      id: Math.random().toString(),
+      completed: false,
+    };
+    setCourseGoals((prevGoals) => [...prevGoals, newGoal]);
+    updateCookie([...courseGoals, newGoal]);
   };
 
-  const deleteItemHandler = goalId => {
-    setCourseGoals(prevGoals => {
-      const updatedGoals = prevGoals.filter(goal => goal.id !== goalId);
+  const toggleCompletionHandler = (goalId) => {
+    setCourseGoals((prevGoals) => {
+      const updatedGoals = prevGoals.filter((goal) => goal.id !== goalId);
+      updateCookie(updatedGoals);
       return updatedGoals;
     });
+    removeCookie("courseGoals");
+  };
+
+  const updateCookie = (updatedGoals) => {
+    setCookie("courseGoals", updatedGoals, { path: "/" });
   };
 
   let content = (
-    <p style={{ textAlign: 'center' }}>No goals found. Maybe add one?</p>
+    <p style={{ textAlign: "center" }}>No goals found. Maybe add one?</p>
   );
 
   if (courseGoals.length > 0) {
     content = (
-      <CourseGoalList items={courseGoals} onDeleteItem={deleteItemHandler} />
+      <CourseGoalList
+        items={courseGoals}
+        onToggleCompletion={toggleCompletionHandler}
+      />
     );
   }
 
@@ -37,16 +55,7 @@ const App = () => {
       <section id="goal-form">
         <CourseInput onAddGoal={addGoalHandler} />
       </section>
-      <section id="goals">
-        {content}
-        {/* {courseGoals.length > 0 && (
-          <CourseGoalList
-            items={courseGoals}
-            onDeleteItem={deleteItemHandler}
-          />
-        ) // <p style={{ textAlign: 'center' }}>No goals found. Maybe add one?</p>
-        } */}
-      </section>
+      <section id="goals">{content}</section>
     </div>
   );
 };

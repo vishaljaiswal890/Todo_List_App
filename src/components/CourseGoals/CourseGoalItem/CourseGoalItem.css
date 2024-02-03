@@ -1,8 +1,19 @@
 .goal-item {
   margin: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #8b005d;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   color: white;
   padding: 1rem 2rem;
+}
+.goal-item input {
+  order: 2;
+  margin-left: 1rem;
   cursor: pointer;
+}
+.completed {
+  text-decoration: line-through;
+  opacity: 0.7;
 }
